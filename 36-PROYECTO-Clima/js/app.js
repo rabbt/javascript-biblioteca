@@ -22,6 +22,7 @@ function buscarClima(e) {
     //consultariamos la api
     consultarAPI(ciudad, pais);
 }
+
 function mostrarError(mensaje){
 
     const alerta = document.querySelector('.bg-red-100')
@@ -46,5 +47,66 @@ function mostrarError(mensaje){
 }
 
 function consultarAPI(ciudad,pais){
-    const appId = '6d3121cbc6b5409a4fe8ec74d5ad9ad5'
+    const appId = '6d3121cbc6b5409a4fe8ec74d5ad9ad5';
+
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${ciudad},${pais}&appid=${appId}`;
+    
+    fetch(url).then(respuesta => respuesta.json())
+                //.then(datos => console.log(datos))
+                .then(datos => {
+
+                    console.log(datos);
+
+                    limpiarHTML()
+                    console.log(datos);
+                    if (datos.cod === '404') {
+                        mostrarError('Ciudad no encontrada')
+                        return;
+                    }
+
+                    //imprime la respuesta en el html
+                    mostrarClima(datos);
+                })
+}
+
+function mostrarClima(datos){
+    const {name, main: { temp, temp_max, temp_min } } = datos;
+
+    const centigrados = kelvinACentigrados(temp);
+    const max = kelvinACentigrados(temp_max);
+    const min = kelvinACentigrados(temp_min);
+
+    const nombreCiudad = document.createElement('p');
+    nombreCiudad.textContent = `clima en ${name}`
+    nombreCiudad.classList.add('font-bold','text-2xl')
+    
+    const actual = document.createElement('p');
+    actual.innerHTML = `${centigrados} &#8451;`;
+    actual.classList.add('font-bold','text-6xl');
+
+    const tempMaxima = document.createElement('p');
+    tempMaxima.innerHTML = `Max: ${max} &#8451;`;
+    tempMaxima.classList.add('text-xl');
+
+    const tempMinima = document.createElement('p');
+    tempMinima.innerHTML = `Min: ${min} &#8451;`;
+    tempMinima.classList.add('text-xl');
+
+    const resultadoDiv = document.createElement('div');
+    resultadoDiv.classList.add('text-center','text-white');
+    resultadoDiv.appendChild(nombreCiudad);
+    resultadoDiv.appendChild(actual);
+    resultadoDiv.appendChild(tempMaxima);
+    resultadoDiv.appendChild(tempMinima);
+
+    resultado.appendChild(resultadoDiv);
+
+}
+
+const kelvinACentigrados = grados => parseInt(grados - 273.15)
+
+function limpiarHTML() {
+    while (resultado.firstChilds) {
+        resultado.removeChild(resultado.firstChild);
+    }
 }
